@@ -1,0 +1,109 @@
+\documentclass{article}
+
+% Packages
+% ---
+\usepackage{amsmath,amssymb,amsthm} 	% Advanced math typesetting
+% \usepackage[utf8]{inputenc} 	% Unicode support (Umlauts etc.)
+\usepackage[USenglish]{babel} 	% Change hyphenation rules
+\usepackage{hyperref} 				% Add a link to your document
+\usepackage{graphicx}				% Add pictures to your document
+\graphicspath{ {./images/} }	% image directory
+
+% Typewriter settings for code
+\usepackage{listings} 				% Source code formatting and highlighting
+\lstset{basicstyle=\ttfamily}		%Typewriter font for code writing
+
+
+\usepackage{enumitem}
+
+% Margins
+\usepackage{geometry}
+\geometry{margin=1in}
+
+
+\usepackage{float}
+\restylefloat{figure}
+\usepackage{mathabx}
+\usepackage{fancyhdr}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{scrextend}
+
+% Siderules for digressions/examples
+\usepackage{mdframed}
+\newmdenv[
+topline=false,
+bottomline=false,
+skipabove=\topsep,
+skipbelow=\topsep
+]{siderules}
+
+% Colors
+\definecolor{blu}{rgb}{0,0,1}
+\def\blu#1{{\color{blu}#1}}
+\definecolor{gre}{rgb}{0,.5,0}
+\def\gre#1{{\color{gre}#1}}
+\definecolor{red}{rgb}{1,0,0}
+\def\red#1{{\color{red}#1}}
+\def\norm#1{\|#1\|}
+
+
+% Headers
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\bf CPSC 322 \\ Week 10 }
+\rhead{\bf Jeremi Do Dinh \\ 61985628}
+\rfoot{Page \thepage}
+
+% Graph drawing tools
+\usepackage{tikz}						
+\usetikzlibrary {positioning}
+
+\usepackage{breqn}
+\usepackage{multicol} 				% Multiple column functionality
+\usepackage{blindtext}
+
+% Figure shortcut
+\newcommand{\centerfig}[2]{\begin{center}\includegraphics[width=#1\textwidth]{#2}\end{center}}
+
+\begin{document}
+
+\section*{Lecture 28 - BNet Inference}
+\url{https://www.cs.ubc.ca/~jordon/teaching/cpsc322/2019w2/lectures/lecture28.pdf}
+\subsubsection*{Goals}
+\begin{itemize}
+	\item Define factors. Derive new factors from existing factors. Apply operations to factors, including assigning, summing out and multiplying factors.
+	\item Carry out variable elimination by using factor representation and using the factor operations. Use techniques to simplify variable elimination.
+\end{itemize}
+
+\subsection*{BNet Inference}
+Our goal in BNet inference is to compute the probabilities of the variables in a belief network:
+\begin{itemize}
+	\item What is the posterior distribution over one or more variables, conditioned on one or more observed variables?
+\end{itemize}
+\subsubsection*{BNets in General}
+Suppose we have that the variables in the belief network are $ \{X_1, \dots, X_n\} $. We also have a variable $ Z $ which we call the "query" variable. \\
+\\
+We have variables $ Y_1 = v_1, \dots, Y_j = v_j $ which are the \textbf{observed v\blu{arg1}ariables}, and their corresponding observed values. $ Z_1, \dots, Z_k $ are the remaining variables. \\
+\\
+We wish to compute:
+\begin{align*}
+P(Z | Y_1 = v_1, \dots, Y_j = v_j)
+\end{align*}
+\begin{siderules}
+We bring back the example of the fire alarm, where we had the following belief network:
+\centerfig{0.3}{BNet-2}
+In this case we may wish to compute: $ P(L | S = t , R = f)$. From marginalization we know that:
+\begin{align*}
+ \blu{P(L | S = t , R = f)} &= \frac{\color{Fuchsia}P(L , S = t , R = f)}{\gre{P(S = t , R = f)}}
+\end{align*}
+An we are given the necessary data to do so:
+\centerfig{0.7}{BNet-3}
+\end{siderules}
+\textbf{In general, we have}
+\begin{align*}
+P(Z | Y_1 = v_1, \dots, Y_j = v_j) &= \frac{P(Z, Y_1 = v_1, \dots, Y_j = v_j)}{P(Y_1 = v_1, \dots, Y_j = v_j)} \\
+&= \frac{P(Z, Y_1 = v_1, \dots, Y_j = v_j)}{\sum_{Z}P(Z,Y_1 = v_1, \dots, Y_j = v_j)}
+\end{align*}
+However we only need to \textbf{compute the \blu{numerator}}, and then \textbf{normalize}. This can be framed in terms of \textbf{operations between \blu{factors}} (that satisfy the semantics of probability)
+
+\end{document}

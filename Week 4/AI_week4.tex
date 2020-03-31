@@ -1,0 +1,359 @@
+% ---
+\documentclass{article}
+
+
+% Packages
+% ---
+\usepackage{amsmath,amssymb,amsthm} 	% Advanced math typesetting
+% \usepackage[utf8]{inputenc} 	% Unicode support (Umlauts etc.)
+\usepackage[USenglish]{babel} 	% Change hyphenation rules
+\usepackage{hyperref} 				% Add a link to your document
+\usepackage{graphicx}				% Add pictures to your document
+\graphicspath{ {./images/} }	% image directory
+\usepackage{listings} 				% Source code formatting and highlighting
+\lstset{basicstyle=\ttfamily}		%Typewriter font for code writing
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{enumitem}
+\usepackage{float}
+%\floatstyle{boxed}
+\restylefloat{figure}
+\usepackage{mathabx}
+\usepackage{fancyhdr}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{scrextend}
+\usepackage{cancel}
+\usepackage{algorithmicx}
+
+% Colors
+\definecolor{blu}{rgb}{0,0,1}
+\def\blu#1{{\color{blu}#1}}
+\definecolor{gre}{rgb}{0,.5,0}
+\def\gre#1{{\color{gre}#1}}
+\definecolor{red}{rgb}{1,0,0}
+\def\red#1{{\color{red}#1}}
+\def\norm#1{\|#1\|}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Def}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\bf CPSC 322 \\ Week 4 }
+\rhead{\bf Jeremi Do Dinh \\ 61985628}
+\rfoot{Page \thepage}
+
+
+
+\usepackage{tikz}						% Graph drawing tools
+\usetikzlibrary {positioning}
+
+\usepackage{breqn}
+\usepackage{multicol} 				% Multiple column functionality
+\usepackage{blindtext}
+\newcommand{\centerfig}[2]{\begin{center}\includegraphics[width=#1\textwidth]{#2}\end{center}}
+
+
+\begin{document}
+
+\noindent \url{https://www.cs.ubc.ca/~jordon/teaching/cpsc322/2019w2/}
+
+\section*{Lecture 10: CSPs - Introduction}
+\textbf{January 28th, 2020} \\
+\url{https://www.cs.ubc.ca/~jordon/teaching/cpsc322/2019w2/lectures/lecture10.pdf}
+
+
+\subsection*{Variables/Features, domains and Possible Worlds}
+Variables/Features:
+\begin{itemize}
+	\item We denote variables using capital letters
+	\item Each variable $ V $ has a \blu{domain} of possible values, denoted $ dom(V) $. 
+	\item Variables can be of several main kinds:
+	\begin{itemize}
+		\item \blu{Boolean}: $ |dom(V)| = 2 $
+		\item \blu{Finite}: the domain contains a finite number of values
+		\item \blu{Infinite but discrete}: the domain is countably infinite
+		\item \blu{Continuous}: e.g.,real numbers between 0 and 1
+	\end{itemize}
+\end{itemize}
+A possible world is a complete assignment of values from domains to variables. 
+
+\begingroup
+\leftskip 2em
+\subsubsection*{Examples:}
+\begin{itemize}[label=$ \rightarrow $]
+	\item Crossword puzzle:
+	\centerfig{0.5}{crossword}
+	\begin{itemize}
+		\item variables are words that have to be filled in (63 in this case)
+		\item domains are valid English words of required length
+		\item possible worlds: all ways of assigning words
+	\end{itemize}
+\item Crossword 2:
+\begin{itemize}
+	\item variables are cells (individual squares) in the 15x15 grid
+\item domains are letters of the alphabet
+\item possible worlds: all ways of assigning letters to cells
+\end{itemize}
+\item Sudoku
+\begin{itemize}
+	\item variables are empty cells
+	\item domains are numbers between 1 and 9
+	\item possible worlds: all ways of assigning numbers to cells
+\end{itemize}
+\item n-Queens problem
+\begin{itemize}
+	\item variable: location of a queen on a chess board
+	\begin{itemize}
+		\item there are n of them in total, hence the name
+	\end{itemize} 
+	\item domains: grid coordinates ($ n^2 $)
+	\item possible worlds: locations of all queens
+	\centerfig{0.25}{queens}
+	
+\end{itemize}
+
+
+
+\item Scheduling problem: \\
+In the scheduling problem we have the following definition of the sets in question:
+\begin{itemize}
+	\item The \blu{variables} are the different tasks that need to be scheduled (e.g., course in a university; job in a machine shop)
+	\item The \blu{domains} are the different combinations of times and locations for each task (e.g., time/room for course; time/machine for job)
+	\item The \blu{possible worlds} are a time/location assignment to each task
+\end{itemize}
+\end{itemize}
+\endgroup
+
+\subsection*{Constraints}
+Constraints are restrictions on the values that one or more variables can take: \\\\
+\textbf{Def:} \blu{A unary constraint} is a restriction involving only one variable. \\\\
+\textbf{Def:} \blu{A k-ary constraint} is a restriction involving the domains of k different variables (However all k-ary constraints can be represented by binary constraints) \\ \\
+\textbf{Constraints can be specified by:}
+\begin{itemize}
+	\item Giving a function that returns true when given values for each variable satisfy the constraint
+	\item Giving a list of valid domain values for each variable participating in the constraint
+\end{itemize}
+\textbf{Def:} A possible world satisfies a set of constraints if the set of variables involved in each constraint take values that are consistent with that constraint. \\ \\
+Constraints in the above examples:
+\begin{itemize}
+	\item Crossword Puzzle: \\
+	\textit{Constraints}: words have the same letters at points where they intersect
+	\item Crossword 2: \\
+	\textit{Constraints}: sequences of letters form valid English words
+	\item Sudoku: \\
+	\textit{constraints}: rows, columns, boxes contain all different numbers
+	\item n-Queens problem \\
+	\textit{constraints}: no queen can attack another
+	\item Scheduling Problem \\
+	\textit{constraints:}
+	\begin{itemize}
+		\item tasks can't be scheduled in the same location at the same time
+		\item certain tasks can be scheduled only in certain locations
+		\item some tasks must come earlier than others; etc.
+	\end{itemize}
+	
+\end{itemize}
+
+
+\subsection*{CSPs}
+\textbf{Def: (Constraint Satisfaction Problem)} \\ 
+A constraint satisfaction problem consists of
+\begin{itemize}
+	\item a set of variables
+\item a domain for each variable
+\item a set of constraints
+\end{itemize}
+\textbf{Def: (model / solution)} \\
+A \blu{model} of a CSP is an assignment of values to variables (i.e. a \textbf{possible world}) that satisfies all of the constraints.
+
+
+\subsubsection*{Variants}
+We may want to solve the following problems using a CSP:
+\begin{enumerate}[label = \Alph*) ]
+	\item determine whether or not a model \blu{exists}
+	\item \blu{find} a model
+	\item \blu{find all} of the models
+	\item \red{count the number of the models}
+	\item find the \blu{best} model given some model quality 
+	\begin{itemize}
+		\item this is now an optimization problem
+	\end{itemize}
+	\item \red{determine whether some properties of the variables hold in all models}
+\end{enumerate}
+
+\textbf{To summarize:}
+\begin{itemize}
+	\item Need to think of search beyond simple goal driven planning agent.
+\item We started exploring the first AI Representation and Reasoning framework: \textbf{CSPs}
+
+\end{itemize}
+
+\newpage
+
+\section*{Lecture 11: CSPs - Search and Arc Consistency}
+\textbf{January 28th \& 30th, 2020} \\
+\url{https://www.cs.ubc.ca/~jordon/teaching/cpsc322/2019w2/lectures/lecture11.pdf}
+
+\subsection*{Generate-and-Test algorithm}
+This algorithm focuses on generating all of the possible worlds at a single time, and test them to see if any violate any constraints. The pseudocode is as follows:
+\begin{lstlisting}[tabsize=3]
+		for a in domA 
+			for b in domB
+				for c in domC
+					if (abc) satisfies all constraints:
+						return (abc)
+		return NULL
+\end{lstlisting}
+
+\subsection*{CSPs as Search Problems}
+We define CSPs the following way:
+\begin{itemize}
+	\item \textbf{\blu{states}}: assignments of values to a subset of the variables
+	\item \textbf{\blu{start}} state: the empty assignment (no variables assigned values)
+	\item \textbf{\blu{neighbours}} of a state: nodes in which values are assigned to one additional variable
+	\item \textbf{\blu{goal state}}: a state which assigns a value to each variable, and satisfies all of the constraints
+\end{itemize}
+For a CSP problem, some search strategies will work better than others. It is important to notice that for a problem with $ n $ variables all of the solutions are at depth $ n $, thus there is \textsl{NO} role for a heuristic function. \\ \\
+Also, since the search space is finite, and without cycles, DFS is the best strategy for finding a solution. \\ \\
+We can avoid exploring some sub-trees i.e. prune the DFS Search tree, by implementing the following strategy:
+\begin{itemize}
+	\item once we consider a path whose end node violates one or more constraints, we know that \textbf{\blu{a solution cannot exist below that point}}
+	\item thus we should \textbf{\blu{remove that path}} rather than continuing to search
+\end{itemize}
+The followign is an example, where the variables set is $ \{A, B, C\} $, the domains for each variable is: $ \{1, 2, 3, 4\} $ and the constraints are: $ \{ A < B, B<C\} $:
+\centerfig{0.6}{ex_csp1}
+At this point it is important to note that the algorithm's efficiency will depend on the order in which the nodes are expanded. \\ \\
+Consequently we ask whether it is possible to do better than search. 
+\subsection*{Consistency}
+\textbf{Key Ideas}: prune the domains as much as possible before “searching” for a solution. \\ \\
+\textbf{Def:} A variable is domain consistent if no value of its domain is ruled impossible by any unary constraints. \\ \\
+We therefore need a way to deal with constraints that involve more than one variable. For this we define constraint networks. 
+
+\subsection*{Constraint Networks}
+\textbf{Def: (Constraint Network)} \\
+A \blu{constraint network} is defined by a graph, with:
+\begin{itemize}
+	\item one \textbf{node} for every \textbf{variable}
+	\item one \textbf{node} for every \textbf{constraint}
+\end{itemize}
+and undirected edges running between variable nodes and constraint nodes whenever a given variable is involved in a given constraint
+
+\subsection*{Arc Consistency}
+\textbf{Def: (Arc Consistency)} \\
+An arc $ \langle X,r(X,Y) \rangle $ is arc consistent if for each value $ x $ in $ dom(X) $ there is some value $ y $ in $ dom(Y ) $ such that $ r(x, y) $ is satisfied.
+
+
+\subsubsection*{How can we enforce Arc Consistency?}
+If an arc $ \langle X,r(X,Y) \rangle $ is not arc consistent, all values $ x $ in $ dom(X) $ for which there is no corresponding value in $ dom(Y ) $ may be deleted from $ dom(X ) $ to make the arc $ \langle X,r(X,Y) \rangle $ consistent. This removal will never rule out any models/solutions.  \\ \\
+\textbf{A network is arc consistent if all arcs are consistent. }
+
+
+\newpage
+
+\section*{Lecture 12: CSPs - Arc Consistency \& Domain Splitting}
+\textbf{January 30th, 2020} \\
+\url{https://www.cs.ubc.ca/~jordon/teaching/cpsc322/2019w2/lectures/lecture12.pdf}
+
+\subsection*{Arc Consistency Algorithm: high level strategy}
+The idea is to consider the arcs in turn, making each arc consistent. However some may be revisited. Notable, when we reduce the domain of a variable X to make an arc $ \langle X, c \rangle $ arc consistent, we add every arc $ \langle Z, c' \rangle $ where $ c' $ involves $ Z $ and $ X $:
+\centerfig{0.8}{arc_consistency}
+It is not necessary to add other arcs $ \langle X, c' \rangle $ where $ c \ne c' $, since if an arc $ \langle X, c' \rangle $ was consistent before, it will still be arc consistent (in the "for all" we'll just check fewer values)
+
+\subsubsection*{Arc Consistency Pseudocode}
+\begin{lstlisting}[tabsize=3]
+	TDA <- all arcs in constraint network 
+	while TDA is not empty:
+		select arc a from TDA
+		if a is not consistent:
+			make a consistent
+			add arcs to TDA that may now be inconsistent
+\end{lstlisting}
+A higher level version of the algorithm is shown below:
+
+\begin{lstlisting}[tabsize=3]
+	Procedure GAC(V,dom,C)
+		Inputs:
+			V: a set of variables
+			dom: a function such that dom(X) is the domain of variable X
+			C: set of constraints to be satisfied
+		Output:
+			arc-consistent domains for each variable
+		Local
+			D_X is a set of values for each variable X 
+			TDA is a set of arcs
+		for each variable X do:
+			D_X <- dom(X)
+			TDA <- {<X, c> | X in V, c in C and X in scope(c)}
+		while TDA is not empty:
+			select <X, c> in TDA
+			TDA <- TDA.remove(<X, c>)
+			ND_X <- {x | x in D_X and there exists y in D_Y s.t. (x,y) satisfies c}
+			if (ND_X != D_X) then:
+				TDA <- TDA + {<Z, c'> | X in scope(c') and c' != c \
+						and Z in scope(c') - {X}} 
+				D_X <- ND_X
+		return {D_X | X is a variable}
+\end{lstlisting}
+
+\subsubsection*{Arc Consistency Algorithm Complexity}
+Let’s determine Worst-case complexity of this procedure:
+\begin{itemize}
+	\item Let the \blu{max size of a variable domain} be $ d $
+	\item Let the \blu{number of variables} be $ n $
+	\item Let all constraints be \textbf{\blu{binary}}
+\end{itemize}
+In this case we have that:
+\begin{itemize}
+	\item The maximum number of binary constraints is: $ \frac{n(n-1)}{2} $
+	\item The number times the same arc can be inserted in back into the ToDoArc list is $ d $
+	\item The number of steps involved in checking the consistency of an arc is: $ d^2 $
+\end{itemize}
+Consequently, the time complexity of the Arc Consistency algorithm is $ O(n^2d^3) $
+
+\subsubsection*{Interpreting Solutions}
+There are three possible outcomes to the algorithm, and they are interpreted as follows:
+\begin{itemize}
+	\item One domain is empty $ \rightarrow $ there is no solution
+	\item Each domain has a unique value $\rightarrow$ there is a unique solution
+	\item Some domains have more than one value $\rightarrow$ \red{zero or more solutions}:
+	\begin{itemize}
+		\item in this case, arc consistency isn't enough to solve the problem: we still need to perform \textit{search}
+	\end{itemize}
+\end{itemize}
+\subsection*{Domain Splitting}
+When arc consistency ends some domains have more than one value, which means there may or may not be a solution... We have two options:
+\begin{enumerate}[label = \Alph* )]
+	\item Apply Depth-First Search with Pruning
+	\item Split the problem in a number of (eg. two) disjoint cases
+\end{enumerate}
+By reducing dom(X) we may be able to run AC again, since we simplify the problem using \textbf{arc consistency}:
+\begin{lstlisting}[tabsize=3]
+	If there is no unique solution (dom(X)>1 for at least one variable):
+		Split X
+		For all the splits:
+			Restart arc consistency on arcs <Z, r(Z,X)>
+\end{lstlisting}
+These are the arcs that are possibly inconsistent.  \\ \\
+The disadvantage of this is that we are required to keep all of the CSPs around rather than smaller simpler states of DFS. 
+\subsubsection*{Searching by Domain splitting}
+\centerfig{0.75}{domainsplitting}
+More formally: Arc consistency with domain splitting as another formulation of CSP as search:
+
+\begin{lstlisting}[tabsize = 3]
+Start state: run AC on vector of original domains (dom(V_1), ..., dom(V_n))
+
+States: "remaining" domains (D(V_1), ..., D(V_n)) for the vars with D(V_i)\
+		in dom(V_i) for each V_i
+		
+Successor function: split one of the domains + run arc consistency
+
+Goal state: vector of unary domains that satisfies all constraints
+
+Solution: any goal state
+\end{lstlisting}
+
+
+
+
+\end{document}

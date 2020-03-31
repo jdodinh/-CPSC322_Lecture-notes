@@ -1,0 +1,349 @@
+\documentclass{article}
+
+% Packages
+% ---
+\usepackage{amsmath,amssymb,amsthm} 	% Advanced math typesetting
+% \usepackage[utf8]{inputenc} 	% Unicode support (Umlauts etc.)
+\usepackage[USenglish]{babel} 	% Change hyphenation rules
+\usepackage{hyperref} 				% Add a link to your document
+\usepackage{graphicx}				% Add pictures to your document
+\graphicspath{ {./images/} }	% image directory
+
+% Typewriter settings for code
+\usepackage{listings} 				% Source code formatting and highlighting
+\lstset{basicstyle=\ttfamily}		%Typewriter font for code writing
+
+
+\usepackage{enumitem}
+
+% Margins
+\usepackage{geometry}
+\geometry{margin=1in}
+
+
+\usepackage{float}
+\restylefloat{figure}
+\usepackage{mathabx}
+\usepackage{fancyhdr}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{scrextend}
+
+% Siderules for digressions/examples
+\usepackage{mdframed}
+\newmdenv[
+topline=false,
+bottomline=false,
+skipabove=\topsep,
+skipbelow=\topsep
+]{siderules}
+
+% Colors
+\definecolor{blu}{rgb}{0,0,1}
+\def\blu#1{{\color{blu}#1}}
+\definecolor{gre}{rgb}{0,.5,0}
+\def\gre#1{{\color{gre}#1}}
+\definecolor{red}{rgb}{1,0,0}
+\def\red#1{{\color{red}#1}}
+\def\norm#1{\|#1\|}
+
+
+% Headers
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\bf CPSC 322 \\ Week 9 }
+\rhead{\bf Jeremi Do Dinh \\ 61985628}
+\rfoot{Page \thepage}
+
+% Graph drawing tools
+\usepackage{tikz}						
+\usetikzlibrary {positioning}
+
+\usepackage{breqn}
+\usepackage{multicol} 				% Multiple column functionality
+\usepackage{blindtext}
+
+% Figure shortcut
+\newcommand{\centerfig}[2]{\begin{center}\includegraphics[width=#1\textwidth]{#2}\end{center}}
+
+
+\begin{document}
+\section*{Lecture 23 - Probability Theory}
+\url{https://www.cs.ubc.ca/~jordon/teaching/cpsc322/2019w2/lectures/lecture23.pdf}
+\subsubsection*{Motivation/Key Points}
+AI agents (and humans) are not omniscient, and the problem is not only predicting the future or “remembering” the past. \\ \\Thus we ask: \textbf{Are agents all ignorant/uncertain to the same degree?} \\ \\
+Should an agent only act if it is certain of some relevant knowledge? And can the agent every be fully certain? For instance, not acting can often have implications... Therefore agents need to represent and reason about their ignorance/uncertainty.
+
+\subsection*{Probability as a formal measure of uncertainty/ignorance}
+We can use probabilities to represent beliefs. For instance consider a simple dice roll. Suppose we want to know whether we rolled a 6. What would be $ P(6) $? And in a new scenario, consider the fact that we know in advance that the number rolled is $ even $:
+\begin{itemize}
+	\item This evidence forces us to update our beliefs.
+	\item What is the new conditional probability $ P(6|even) $
+\end{itemize}
+
+\subsection*{Random Variables}
+A \textbf{random variable} is a \textit{variable} (like the ones we have seen in CSP and Planning), but the agent can be uncertain about its value. \\
+\\
+As usual:
+\begin{itemize}
+	\item The \textbf{domain} of a random variable $ X $ is $ dom(X) $ is the set of values that $ X $ can take
+	\item values are mutually exclusive and exhaustive
+\end{itemize}
+A \textbf{tuple of random variables} $ <X_1, ..., X_n > $ is a \blu{complex random variable} with domain \gre{$< dom(X_1) \times ... \times dom(X_n) > $} \\
+\\
+\textbf{\blu{An assignment}} $ X = x $ means that $ X $ takes the value $ x $. \\
+\\
+\textbf{A \textbf{proposition}} is a Boolean formula made from assignments of values to variables.
+
+\subsubsection*{Possible Worlds}
+A \blu{\textbf{possible world }}specifies an assignment to each random variable. As usual, the possible worlds are mutually \gre{exclusive}, and \gre{exhaustive}. \\
+\\
+$ w \vDash X = x $ means that variable $ X $ was assigned value $ x $ in world $ w $
+
+\subsubsection*{Semantics of Probability}
+The belief of being in each possible world w can be expressed as a probability $ \mu(w) $, and 
+\begin{align*}
+\sum_{w \in W} \mu(w) = 1
+\end{align*}
+
+\subsubsection*{Probability of a proposition}
+We ask what is the probability of a proposition $ f $?\\
+\\
+For any $ f $, it is the probability of the worlds where $ f $ is \textbf{\blu{true}}. 
+\begin{align*}
+P(f) &= \sum_{w \vDash f}\mu (w)
+\end{align*}
+
+\subsection*{Probability Distributions}
+A probability distribution $ \mathbf{P} $ on a random variable $ \mathbf{X} $ is a function $ dom(X) \rightarrow [0, 1] $ such that:
+\begin{align*}
+x \rightarrow P(X = x)
+\end{align*}
+We can represent 3 kinds of beliefs:
+\begin{enumerate}
+	\item complete certainty
+	\item perfect uncertainty
+	\item some reasonable guess
+\end{enumerate}
+
+\subsection*{Joint Probability Distributions}
+When we have \textbf{multiple random variables}, their \blu{join distribution} is a probability distribution over the variables' Cartesian product:
+\begin{itemize}
+	\item Eg.: $ P(<X_1, ..., X_n > ) $
+	\item We can think of a joint probability distribution over $ n $ variables as an $ n $ dimensional table
+	\item Each entry indexed by $ X_1 = x_1 $, ..., $ X_n = x_n $ corresponds to $ P(X_1 = x_1 \land \dots \land X_n = x_n ) $
+	\item The sum of entries across the whole table is 1
+\end{itemize}
+
+\subsection*{Some remaining questions}
+Suppose you have the joint probability distribution of $ n $ variables:
+\begin{itemize}
+	\item Can you compute the probability distribution for each variable?
+	\item Can you compute the probability distribution for any combination of variables?
+	\item Can you update these probabilities if you know something about some of the variables?
+	\item Is there a downside to the joint probability distribution?
+\end{itemize}
+
+\newpage
+
+\section*{Lecture 24 - Conditional Probability}
+\url{https://www.cs.ubc.ca/~jordon/teaching/cpsc322/2019w2/lectures/lecture24.pdf}
+\subsubsection*{Goals:}
+\begin{itemize}
+	\item Given a joint probability distribution (JPD), compute distributions over any subset of the variables
+	\item Derive and use the formula to compute conditional probabilities $ P(h|e) $
+	\item Derive the \textbf{Chain Rule} and \textbf{Bayes’ Rule}
+\end{itemize}
+
+\subsection*{Joint Distribution and Marginalization}
+Given a joint distribution, e.g. $ P(X,Y, Z) $ we can compute distributions over any smaller sets of variables:
+\begin{align*}
+P(X,Y) &= \sum_{z \in \text{dom}(Z)} P(X, Y, Z = z)
+\end{align*}
+
+\subsection*{Conditioning (Conditional Probability)}
+We \textbf{model our environment} with a set of \textbf{random variables}. Assuming we have the \textbf{\blu{joint}}, we can compute the probability of \textbf{\blu{any formula}}.\\
+\\
+Probabilistic conditioning specifies how to \textbf{revise beliefs based on new information}. You build a probabilistic model (for now the joint) taking all background information into account, which gives us the \blu{\textbf{prior probability}}. \\
+\\
+If evidence \blu{$ e $} is all the new information obtained subsequently, the \blu{conditional probability} $ P(h | e) $ of $ h $ given $ e $ is the \blu{posterior probability} of $ h $.
+
+\subsubsection*{How can we compute $ \mathbf{P(h|e)} $}
+\textbf{Q:} What happens in terms of possible worlds if we know the value of a random var (or a set of random vars)? \\
+\\
+\textbf{A:} Some worlds are \red{\textbf{ruled out}}. The others become \gre{\textbf{more likely}}.\\
+\\
+Suppose we have a given value of a $ \mathbf{RV} $ that we know is true. Then we have that:
+\begin{align*}
+\mu_e(w) &= \begin{cases}
+	\frac{\mu(w)}{P(e)}  & \text{if $ w \vDash e $} \\
+	0 & \text{otherwise}
+\end{cases} 
+\end{align*}
+Then as a result we have:
+\begin{align*}
+P(h|e) &= \sum_{w \vDash h} \mu_e(w)
+\end{align*}
+Thus , some semantics of conditional probability based on the above examples are used below, to derive the conditional probability of formula $ h $ given evidence $ e $:
+\begin{align*}
+P(h|e) &= \sum_{w \vDash h} \mu_e(w) \\
+&= \sum_{w \vDash h \land e} \frac{1}{P(e)}\mu(w) \\
+&= \frac{1}{P(e)} \sum_{w \vDash h \land e} \mu(w) \\
+&= \frac{P(h \land e)}{P(e)}
+\end{align*}
+
+\subsection*{Product Rule}
+The definition of conditional probability for random variables is:
+\begin{align*}
+P(X_1 | X_2) &= \frac{P(X_1 , X_2)}{P(X_2)} \\
+\intertext{The product rule gies a more intuitive alternative formulation:}
+P(\blu{X_1}, \red{X_2}) &= P(\blu{X_1} | \red{X_2})P(\red{X_2}) = P(\red{X_2} | \blu{X_1})P(\blu{X_1})\\
+\intertext{And in general terms we have:}
+P(X_1, \dots X_n) &= P(\gre{X_1, \dots, X_t}, {\color{Fuchsia}X_{t+1}, \dots , X_n}) \\
+&= P({\color{Fuchsia}X_{t+1}, \dots , X_n} | \gre{X_1, \dots, X_t})P(\gre{X_1, \dots, X_t})
+\end{align*}
+
+\subsection*{Chain Rule}
+The chain rule is derived though successive application of the product rule:
+\begin{align*}
+P(X_1, \dots, X_{n-1}, {\color{Fuchsia}X_n}) &= P(X_1, \dots, \blu{X_{n-1}}){\color{Fuchsia}P(X_n | X_1, \dots, X_{n-1})} \\
+&= P(X_1, \dots, X_{n-2})\blu{P(X_{n-1} | X_1, \dots, X_{n-2})}{\color{Fuchsia}P(X_n | X_1, \dots, X_{n-1})}\\
+&= \dots = \\
+&= P(X_1)P(X_2 | X_1)P(X_3 | X_1, X_2)\cdot \dots \cdot \blu{P(X_{n-1} | X_1, \dots, X_{n-2})}{\color{Fuchsia}P(X_n | X_1, \dots, X_{n-1})}\\
+&= \prod_{i = 1}^n P(X_i | X_1, \dots, X_{i-1})
+\end{align*}
+
+\subsection*{Bayes' Rule and Independence}
+We often use \red{casual knowledge} (forward from cause to evidence). For example:
+\begin{itemize}
+	\item $ P(\text{symptom} | \text{disease}) $
+	\item $ P(\text{light is off} | \text{status of switches and switch positions}) $
+	\item $ P(\text{alarm} | \text{fire}) $
+\end{itemize}
+In general: $ P(\text{evidence } e | \text{hypothesis } h) $\\
+\\
+And we would rather use \red{evidential reasoning} (backwards from evidence to cause). For example:
+\begin{itemize}
+	\item $ P(\text{disease} | \text{symptom}) $
+	\item $ P(\text{status of switches and switch positions} | \text{light is off}) $
+	\item $ P(\text{fire} | \text{alarm}) $
+\end{itemize}
+In general: $ P(\text{hypothesis } h | \text{evidence } e) $
+
+\subsection*{Baye's Rule}
+By definition we know that:
+\begin{align*}
+P(h|e) &=\frac{P(h \land e)}{P(e)} \\
+\intertext{and:}
+P(e|h) &=\frac{P(e \land h)}{P(h)}
+\end{align*}
+We rearrange the terms to write:
+\begin{align}
+P(h \land e) &= P(h|e) P(e) \\
+P(e \land h) &= P(e|h)P(h) \\
+\intertext{but:}
+P(h \land e) &= P(e \land h) 
+\end{align}
+From (1), (2) and (3) we can derive \textbf{Bayes' rule}:
+\begin{align*}
+P(h|e) &= \frac{P(e|h)P(h)}{P(e)}
+\end{align*}
+
+\subsubsection*{Conditional probability (irrelevant evidence)}
+New evidence may be irrelevant, allowing simplification. For instance:
+\begin{align*}
+P(\text{cavity} | \text{toothache}, \text{sunny}) = P(\text{cavity} | \text{toothache})
+\end{align*}
+We then say that Cavity is conditionally independent from Weather. \\
+\\
+This kind of inference, sanctioned by domain knowledge, is crucial in probabilistic inference
+
+\newpage
+
+\section*{Lecture 25 - Conditional Probability}
+\url{https://www.cs.ubc.ca/~jordon/teaching/cpsc322/2019w2/lectures/lecture25.pdf}
+
+\subsection*{Marginal Independence}
+\textbf{Q:} Do we always have to revise our beliefs?\\
+\\
+\textbf{\blu{NO}}, not when your knowledge of $\mathbf{Y}$’s value doesn't affect your belief in the value of $\mathbf{X}$
+\begin{siderules}
+\textbf{Def:} A \textit{RV} $\mathbf{X}$ is said to be marginally independent of random variable $\mathbf{Y}$ if for all $ x_i \in \text{dom}(\mathbf{X}) $ and all $ y_k \in \text{dom}(\mathbf{Y}) $:
+\begin{align*}
+P(X = x_i | Y = y_k) &= P(X = x_i)
+\end{align*}
+Consequently, $\mathbf{X}$ and $\mathbf{Y}$ are said to be marginally independent if:
+\begin{align*}
+P(X|Y) = P(X) \quad \text{or} \quad P(Y|X) = P(Y) \quad \text{or} \quad P(X, Y) = P(X) P(Y)
+\end{align*}
+	\end{siderules}
+
+\subsection*{Conditional Independence}
+With marginal independence, for $ n $ independent random vars we move from $ O(dn) $ to $ O(n*d) $ space complexity:
+\gre{
+\begin{align*}
+P(x_1, \dots, x_n) &= P(x_1) \cdot \dots \cdot P(x_n)
+\end{align*}
+}
+Absolute independence is powerful \textbf{but} when you model a \textbf{particular domain}, it is \textbf{rare}. \\
+\\
+We often run into cases with hundreds of variables, few of which are independent. What should be done in that case?
+\subsubsection*{We look for weaker forms of independence.}
+For example in the toothache example, we may have the following statements that are true:
+\begin{enumerate}
+	\item $ P(\text{Catch} | \text{Toothache},\text{Cavity}) = P(\text{Catch} | \text{Cavity}) $\\
+	And the following are equivalent statements:
+	\item $ P(\text{Toothache} | \text{Catch}, \text{Cavity}) = P(\text{Toothache} | \text{Cavity}) $
+	\item $ P(\text{Toothache}, \text{Catch} | \text{Cavity}) =P(\text{Toothache} | \text{Cavity}) P(\text{Catch} | \text{Cavity}) $
+\end{enumerate}
+A proof follows:
+\begin{align*}
+\text{(1)} &\implies P(X | Y,Z) = P(X|Z) \\
+&\implies \frac{P(X,Y,Z)}{P(Y,Z)} = \frac{P(X,Z)}{P(Z)} \quad (\implies \text{(2)}) \\
+&\implies \frac{P(X,Y,Z)}{P(X,Z)} = \frac{P(Y,Z)}{P(Z)} \\
+& \implies P(Y | X,Z) = P(Y | Z) \\
+\end{align*}
+Additionally we have:
+
+\begin{align*}
+(3) \implies P(X,Y | Z) &= \frac{P(X,Y,Z)}{P(Z)}\\ 
+&=  \frac{P(Y,Z)P(X,Z)}{P(Z)} \cdot \frac{1}{P(Z)} \quad \text{(from (2) above)} \\
+&= \frac{P(Y,Z)}{P(Z)} \cdot \frac{P(X,Z)}{P(Z)} \\
+&= P(Y|Z) \cdot P(X|Z)
+\end{align*}
+
+\subsubsection*{Conditional Independence: Formal Definition}
+Sometimes, two variables might not be marginally independent. However, they \textit{become} independent after we observe some third variable. 
+\begin{siderules}
+\textbf{Def:} A random variable $\mathbf{X}$ is said to be \blu{conditionally independent} of random variable $\mathbf{Y}$ given a random variable $\mathbf{Z}$ if, for all $ x_i \in \text{dom}(\mathbf{X})  $, $ y_k \in \text{dom}(\mathbf{Y})  $ and $ z_m \in \text{dom}(\mathbf{Z})  $:
+\begin{align*}
+P(X = x_1 | Y = y_k, Z = z_m) &= P(X = x_1 | Y = y_k)
+\end{align*}
+In other words, the knowledge of$\mathbf{Y}$'s value does not affect the belief in the value of $\mathbf{X}$, given a value of $\mathbf{Z}$.
+	\end{siderules}
+
+\subsubsection*{Side note: storing distributions}
+Joint Probability Distribution (JPD): has $ O(d^n) $ values:
+\begin{itemize}
+	\item  But they have to sum to 1,so do we need to store all of them? 
+ \item How many do we need to store?
+\end{itemize}
+Conditional Probability Table (CPT): has $ O(d^n) $ values
+\begin{itemize}
+	\item But each row has to sum to 1, so do we need to store all of
+them?
+\item How many do we need to store?
+\end{itemize}
+
+\subsubsection*{Conditional independence: Use}
+We can write out the join distributions using the chain rule
+\begin{align*}
+P(\text{Cavity}, \text{Catch} , \text{Toothache}) &= P(\text{Toothache} | \text{Catch}, \text{Cavity})P(\text{Catch} | \text{Cavity} )P(\text{Cavity} ) \\
+&=  P(\text{Toothache} | \text{Cavity})P(\text{Catch} | \text{Cavity} )P(\text{Cavity} )
+\end{align*}
+So how many probabilities do we need to write out?\\
+\\
+The use of conditional independence often reduces the size of the representation of the joint distribution from exponential in $ n $ to linear in $ n $, where $ n $ is the number of variables\\
+\\
+\textbf{Conditional independence} is our \textbf{most basic} and \textbf{robust} form of \textbf{knowledge} about \textbf{uncertain environments}
+
+\end{document}
