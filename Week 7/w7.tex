@@ -1,0 +1,186 @@
+% ---
+\documentclass{article}
+
+
+\usepackage[USenglish]{babel} 	% Change hyphenation rules
+\usepackage{hyperref} 				% Add a link to your document
+\usepackage{graphicx}				% Add pictures to your document
+\graphicspath{ {./images/} }	% image directory
+\usepackage{listings} 				% Source code formatting and highlighting
+\lstset{basicstyle=\ttfamily}		%Typewriter font for code writing
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{amsmath, amssymb}
+%\floatstyle{boxed}
+\restylefloat{figure}
+\usepackage{mathabx}
+\usepackage{fancyhdr}
+\usepackage{mdframed}
+\usepackage{needspace}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{scrextend}
+
+% Colors
+\definecolor{blu}{rgb}{0,0,1}
+\def\blu#1{{\color{blu}#1}}
+\definecolor{gre}{rgb}{0,.5,0}
+\def\gre#1{{\color{gre}#1}}
+\definecolor{red}{rgb}{1,0,0}
+\def\red#1{{\color{red}#1}}
+\def\norm#1{\|#1\|}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\bf CPSC 322 \\ Week 7 }
+\rhead{\bf Jeremi Do Dinh \\ 61985628}
+\rfoot{Page \thepage}
+
+
+
+\usepackage{tikz}						% Graph drawing tools
+\usetikzlibrary {positioning}
+
+\usepackage{breqn}
+\usepackage{multicol} 				% Multiple column functionality
+\usepackage{blindtext}
+\newcommand{\centerfig}[2]{\begin{center}\includegraphics[width=#1\textwidth]{#2}\end{center}}
+
+\newmdenv[
+topline=false,
+bottomline=false,
+skipabove=\topsep,
+skipbelow=\topsep
+]{siderules}
+
+\begin{document}
+\noindent \url{https://www.cs.ubc.ca/~jordon/teaching/cpsc322/2019w2/}
+\section*{Lecture 18 - Logic: Intro \& Syntax}
+\textbf{February 24th, 2020}\\
+\url{https://www.cs.ubc.ca/~jordon/teaching/cpsc322/2019w2/lectures/lecture18.pdf}\\
+\\
+\textbf{Logic is the language of Mathematics}, used to define formal structures (e.g., sets, graphs) and to prove statements about them.\\
+\\
+Consider how to represent an environment about which we have only partial (but certain) information. What do we need to represent?:
+\begin{itemize}
+	\item \textbf{\blu{Facts}} about the environment
+\item \textbf{{\color{Fuchsia}Rules}} of how the environment works
+\end{itemize}
+\subsection*{Propositional Logic}
+\textbf{We begin with propositional logics}, since this is the starting point for more complex logics. The primitive elements of propositional logic are \textbf{\textit{propositions}}: Boolean variables that can be  $ \{true, false\} $.\\
+\\
+The goal is to illustrate the basic ideas as a starting point for more complex logics. Boolean nature can be exploited for efficiency.\\
+\\
+The proposition symbols $ p_1, p_2, \dots $ etc. are sentences:
+\begin{itemize}
+	\item If $ S $ is a sentence, then $ \lnot S $ is a sentence (\blu{negation})
+	\item If $ S_1 $ and $ S_2 $ are sentences, then $ S_1 \land S_2 $ is a sentence (\blu{conjunction})
+	\item If $ S_1 $ and $ S_2 $ are sentences, then $ S_1 \lor S_2 $ is a sentence (\blu{disjunction})
+	\item If $ S_1 $ and $ S_2 $ are sentences, then $ S_1 \Rightarrow S_2 $ is a sentence (\blu{implication})
+	\item If $ S_1 $ and $ S_2 $ are sentences, then $ S_1 \Leftrightarrow S_2 $ is a sentence (\blu{biconditional})
+\end{itemize}
+\subsubsection*{Propositional Logics in practice}
+\begin{itemize}
+	\item Agent is told (perceives) some facts about the world (\blu{a set of true propositions})
+	\item Agent is told (already knows / learns) how the world works ({\color{Fuchsia}a set of logical formulas})
+	\item Agent can answer \gre{yes/no questions} about whether other facts \textbf{\blu{must be true}}
+\end{itemize}
+\subsubsection*{Using Logics to make inferences...}
+\begin{enumerate}
+	\item  Begin with a task domain.
+	\item Distinguish those things you want to talk about
+	\item Choose symbols in the computer to denote propositions
+	\item Tell the system knowledge about the domain
+	\item Ask the system whether new statements about the domain are true or false
+\end{enumerate}
+
+\subsection*{Propositional Definite Clauses}
+This is our first representation and reasoning system. We only have two kinds of statements:
+\begin{itemize}
+	\item that a \textbf{proposition is true}: $ p_2 $
+	\item that a proposition is true if one or more other propositions are true $ p_2 \leftarrow p_1 \land p_3 $
+\end{itemize}
+\subsection*{Propositional Definite Clauses: Syntax}
+\textbf{Def: (atom)} \\
+An \blu{\textbf{atom}} is a symbol starting with a lower case letter. \\
+\\
+\textbf{Def: (body)}\\
+A \textbf{\blu{body}} is an atom, or is of the form $ b_1 \land b_2 $ where $ b_1 $ and $ b_2 $ are bodies. \\
+\\
+\textbf{Def: (definite clause)}\\
+A \textbf{\blu{definite clause}} is an atom or is a rule of the form $ h \leftarrow b $ where $ h $ is an atom and $ b $ is a body. We read this as "$ h $ if $ b $".\\
+\\
+\textbf{Def: (knowledge base)}\\
+A \textbf{\blu{knowledge base}} is a set of definite clauses.
+
+\newpage
+
+\section*{Lecture 19 - Logic: Semantics and Bottom-Up Proofs}
+\textbf{February 26th, 2020}\\
+\url{https://www.cs.ubc.ca/~jordon/teaching/cpsc322/2019w2/lectures/lecture19.pdf}\\
+\subsection*{Propositional Definite Clauses Semantics: Interpretation}
+Semantics allows you to relate the symbols in the logic to the domain you're trying to model. An atom can be $ T $ or $ F $. \\
+\\
+\textbf{Def: (Interpretation)}\\
+An \textit{\blu{interpretation}} $ I $ assigns a truth value to each atom. \\
+\\
+So an interpretation is just a \blu{\textbf{possible world}}\\
+\\
+We can use the \textbf{interpretation} to determine the truth value of \textbf{clauses} and \textbf{knowledge bases}. \\
+\\
+\textbf{Def: (truth values of statements)}\\
+A \blu{body $ b_1 \land b_2 $ is true in $ I $} if and only if $ b_1 $ is true in $ I $ and $ b_2 $ is true in $ I $. \\
+\\
+\textbf{Def: (truth values of statements cont')}\\
+A \blu{rule $ h \leftarrow b $ is false in $ I $} if and only if \blu{$ b $ is true in $ I $} and \blu{$ h $ is false in $ I $}. \\
+\\
+\textbf{Semantics of a KB}: \\
+A \textbf{\red{knowledge base KB}} is true in $ I $ if and only if every clause in KB is true in $ I $. \\
+\\
+\textbf{Def: Model}\\
+A \textbf{model} of a set of clauses (a Knowledge base) is an interpretation in which all clauses are \textbf{\textit{true}}.
+
+\subsection*{Logical Consequence}
+\textbf{Def: (logical consequence)}\\
+If $ KB $ is a set of clauses and $ G $ is a conjunction of atoms, then $ G $ is a logical consequence of $ KB $, written a $ KB \vDash G $, if $ G $ is true in every model of $ KB $.\\
+\begin{itemize}
+	\item It can also be said that $ G $ \blu{logically follows} from $ KB $, or that $ KB $ entails $ G $. 
+	\item In other words, $ KB \vDash G $ if there is no interpretation $ I $ in which $ KB $ is $ true $ and $ G $ is $ false $.
+\end{itemize}
+
+\subsection*{Soundness and Completeness}
+Suppose we are told that we have a \textbf{\blu{proof procedure for PDCL}}. What needs to be shown in order for us to trust the given procedure? \\
+\\
+\textbf{Recall:} \\
+$ K \vdash G $ means that $ G $ can be derived by, the given proof procedure, from $ KB $.\\
+$ K \vDash G $ means that $ G $ is true in all models of $ KB $\\
+\\
+\underline{\textbf{Def: (soundness)}}\\
+A proof system is \blu{sound} if $ KB \vdash G $ implies that $ KB \vDash G $\\
+\\
+$\underline{\textbf{Def: (completeness)}}$\\
+A proof procedure is \blu{complete} if $ KB \vDash G $ implies that $ KB \vdash G $
+
+
+\subsection*{Bottom-up Ground Proof Procedure}
+One mainly used \blu{rule of derivation}, which is a generalized form of \textbf{\textit{modus ponens}} is defined as follows:\\
+\\
+If $ h \leftarrow b_1 \land \dots \land b_m $ is a clause in the knowledge base, and each $ b_i $ has been derived, then $ h $ can be derived. \\
+\\
+The procedure uses the above rule to find whether $ G $ logically follows from the knowledge base. We then have that \blu{$ KB \vdash G $ if at the end of the procedure $ G \subseteq C $}:
+\begin{siderules}
+	\textbf{Algorithm:}
+\begin{itemize}[label = ]
+\item $ C := \{\} $
+\item \textbf{repeat}:
+\begin{itemize}[label = ]
+	\item 	\textbf{select} clause "$ h \leftarrow b_1 \land ... \land b_m $" in KB such that $ b_i \in C $ for all $ i $, and $ h \notin C $. 
+	\item $ C := C \cup \{h\} $
+\end{itemize}
+\item \textbf{until} no more clauses can be selected
+\end{itemize}
+\end{siderules}
+
+
+\end{document}

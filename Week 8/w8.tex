@@ -1,0 +1,285 @@
+% ---
+\documentclass{article}
+
+
+\usepackage[USenglish]{babel} 	% Change hyphenation rules
+\usepackage{hyperref} 				% Add a link to your document
+\usepackage{graphicx}				% Add pictures to your document
+\graphicspath{ {./images/} }	% image directory
+\usepackage{listings} 				% Source code formatting and highlighting
+\lstset{basicstyle=\ttfamily}		%Typewriter font for code writing
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{amsmath, amssymb}
+%\floatstyle{boxed}
+\restylefloat{figure}
+\usepackage{mathabx}
+\usepackage{fancyhdr}
+\usepackage{mdframed}
+\usepackage{needspace}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{scrextend}
+
+% Colors
+\definecolor{blu}{rgb}{0,0,1}
+\def\blu#1{{\color{blu}#1}}
+\definecolor{gre}{rgb}{0,.5,0}
+\def\gre#1{{\color{gre}#1}}
+\definecolor{red}{rgb}{1,0,0}
+\def\red#1{{\color{red}#1}}
+\def\norm#1{\|#1\|}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\bf CPSC 322 \\ Week 8 }
+\rhead{\bf Jeremi Do Dinh \\ 61985628}
+\rfoot{Page \thepage}
+
+
+
+\usepackage{tikz}						% Graph drawing tools
+\usetikzlibrary {positioning}
+
+\usepackage{breqn}
+\usepackage{multicol} 				% Multiple column functionality
+\usepackage{blindtext}
+\newcommand{\centerfig}[2]{\begin{center}\includegraphics[width=#1\textwidth]{#2}\end{center}}
+
+\newmdenv[
+topline=false,
+bottomline=false,
+skipabove=\topsep,
+skipbelow=\topsep
+]{siderules}
+
+\begin{document}
+\noindent \url{https://www.cs.ubc.ca/~jordon/teaching/cpsc322/2019w2/}
+\section*{Lecture 20 - Bottom Up proof: soundness and completeness}
+\textbf{March 3rd, 2020}\\
+\url{https://www.cs.ubc.ca/~jordon/teaching/cpsc322/2019w2/lectures/lecture20.pdf}
+\subsubsection*{Goals:}
+\begin{itemize}
+	\item Prove that the bottom up proof system is \textbf{\blu{sound}}
+	\item Prove that the bottom up proof system in \textbf{\blu{complete}}
+\end{itemize}
+\textbf{Recap of soundness and completeness}\\
+\\
+\textbf{Def: (Generic soundness of a proof procedure)}\\
+If $ G  $ can be proven by the procedure ($ KB \vdash G $) then $ G $ is logically entailed by the $ KB $ ($ KB \vDash G $)\\
+\\
+\textbf{Def: Generic completeness of proof procedure}\\
+If $ G $ is logically entailed by the $ KB $ ($ KB \vDash G $), then $ G $ can be proven by the procedure ($KB \vdash G $). \\
+\\
+In other words:
+\begin{itemize}
+	\item Everything \gre{\textbf{derived}} from a \textbf{\blu{sound}} proof procedure is \textbf{\color{Fuchsia}entailed} by the KB.
+	\item Everything \textbf{\color{Fuchsia}entailed} by the KB can be \gre{\textbf{derived}} a \textbf{\blu{complete}} proof procedure
+\end{itemize}
+We had the algorithm for computing the set of consequences of $ KB $:
+\begin{itemize}[label = ]
+	\item $ C := \{\} $
+	\item \textbf{repeat}:
+	\begin{itemize}[label = ]
+		\item 	\textbf{select} clause "$ h \leftarrow b_1 \land ... \land b_m $" in KB such that $ b_i \in C $ for all $ i $, and $ h \notin C $. 
+		\item $ C := C \cup \{h\} $
+	\end{itemize}
+	\item \textbf{until} no more clauses can be selected
+\end{itemize}
+So BU is sound if all of the atoms in $ C $ are logically entailed by KB
+\subsubsection*{Soundness}
+Every atom in $ C $ is a logical consequence of $ KB $.\\
+\\
+\textbf{Proof (by contradiction):}\\
+Suppose there exists an atom in $ C $ that is not a logical consequence of $ KB $. If this is the case, let $ h $ be the first atom added to $ C $ that is not a logical consequence of $ KB $. Let $ I $ be a model in which $ h $ is false.\\\\
+Because $ h $ has been generated, there must be some definite clause of the form $ h \leftarrow a_1 \land \dots \land a_m $, such that $ a_1, \dots, a_m $ are all in $ C $.\\
+\\
+Because $ h $ is the first atom added to $ C $ that is not true in all models of $ KB $, then all the $ a_i $ are generated before $ h $ are true in $ I $. Thus it is a clause where the head is false but the body is true, and thus by the definition of truth clauses this clause is false in $ I $. This is a contradiction to the fact that $ I $ is a model of $ KB $. Thus every element of $ C $ is a logical consequence of $ KB $.
+
+\subsubsection*{Completeness}
+If $ G $ is logically entailed by the $ KB $ ($ KB \vDash G $) then $ G $ can be proved by the procedure ($ KB \vdash G $)\\
+\\
+\textbf{Proof}:\\
+Suppose that $ KB \vDash G $. Then $ G $ is true in all models of $ KB $. Thus $ G $ is true in any particular model of $ KB $. \\
+\\
+We will define a particular model such that if $ G $ is true in that model, $ G $ is proven by the bottom up algorithm. We will therefore define a particular interpretation $ I $ such that iff $ G $ is true in $ I $, $ G $ is proved by the bottom-up algorithm. We will then show that $ I $ is a model. Thus we will define $ I $ such that if $ G $ is true in $ I $, then $ G \subseteq C $.\\
+\\
+Let $ I $ be an interpretation where each element of $ C $ is \blu{\textbf{true}}, and every other atom is \blu{\textbf{false}}. We claim that $ I $ is a model of $ KB $ (which we'll call the minimal model)
+\begin{siderules}
+\textbf{Proof} (of claim):\\
+\textbf{Assume} that $ I $ is not a model of $ KB $. \textbf{Then} there must exist a clause $ h \leftarrow b_1 \land \dots \land b_m $ in $ KB $ (having zero or more $ b_i $'s) which is \textbf{false} in $ I $. The only way this an occur is if all of the $ b_i $'s are true in $ I $ (are in $ C $) and $ h $ is false in $ I $ (not in $ C $).\\
+\\
+But if each $ b_i $ belonged to $ C $, bottom up would've added $ h $ to $ C $ as well. Therefore there can be no clause in $ KB $ that is false in interpretation $ I $ (which implies the claim)
+\end{siderules}
+
+
+
+\newpage
+\section*{Lecture 21 - Domain Modeling and Top-Down Proofs}
+\textbf{March 3rd \& 5th, 2020}\\
+\url{https://www.cs.ubc.ca/~jordon/teaching/cpsc322/2019w2/lectures/lecture21.pdf}
+\subsection*{Top-Down Proof Procedure}
+\subsubsection*{Bottom-up vs. Top-down}
+Bottom up starts with a knowledge base, and derives the set of consequences. 
+\centerfig{0.5}{bottom-up-1}
+We have that $ G $ is proved, if at the end $ G \subseteq C $. Therefore BU looks at the query only at the end. \\
+\\
+The \textbf{key idea} of the top down proof system is to \textbf{search backwards} from a query $ G $ to determine if it can be derived from $ KB $. 
+\centerfig{0.5}{top-down-1}
+TD performs a backwards search, starting at $ G $.
+\subsection*{Top-Down Proof Procedure: Elements}
+\textbf{Notation:} An \blu{answer clause} is of the form:
+\begin{align*}
+yes \leftarrow a_1 \land a_2 \land \dots \land a_m
+\end{align*}
+\textbf{Express query} as an \blu{answer clause} (e.g.: if query = $ a_1 \land \dots \land a_m $), then this yields:
+\begin{align*}
+yes \leftarrow a_1 \land a_2 \land \dots \land a_m
+\end{align*}
+\textbf{Rule of inference:} (called SLD Resolution). Given an answer clause of the form
+\begin{align*}
+yes \leftarrow a_1 \land a_2 \land \dots \land a_m
+\end{align*}
+and the KB clause:
+\begin{align*}
+a_i \leftarrow b_1 \land b_2 \land \dots \land b_p
+\end{align*}
+You can generate the answer clause:
+\begin{align*}
+yes \leftarrow a_1 \land \dots \land a_{i-1} \land \blu{b_1 \land b_2 \land \dots \land b_p} \land a_{i+1} \land \dots \land a_m
+\end{align*}
+Some examples are illustrated in the following table:
+\begin{center}
+\begin{tabular}{| c | c | c |}
+	\hline
+	answer clause & $ KB $ clause & resulting inference \\
+	\hline
+	$ yes \leftarrow b \land c $ & $ b \leftarrow k \land f $ & $ yes \leftarrow k \land f \land c $\\
+	\hline
+	$ yes \leftarrow e \land f $ & $ e $ ($ e \leftarrow $) & $ yes \leftarrow f $\\
+	 \hline
+\end{tabular}
+\end{center}
+
+\subsection*{(Successful) Derivations}
+An \blu{answer} is an answer clause with $ m = 0 $. That is, it is the \textbf{empty} answer clause "$ yes \leftarrow $"\\
+\\
+A (successful) \blu{derivation} of query "$ ?q_1\land \dots \land q_k $" from the $ KB $ is a sequence of answer clauses $ Y_0, Y_1, \dots, Y_n $ such that:
+\begin{itemize}
+	\item $ Y_0 $ is the answer clause $ yes \leftarrow q_1\land \dots \land q_k $
+	\item $ Y_i $ is obtained by \blu{resolving} $ Y_{i-1} $ with a clause in $ KB $
+	\item $ Y_n $ is the empty clause
+\end{itemize}
+
+\newpage
+\section*{Lecture 22 - TD as search, Datalog (variables)}
+\textbf{March 5th, 2020}\\
+\url{https://www.cs.ubc.ca/~jordon/teaching/cpsc322/2019w2/lectures/lecture22.pdf}
+\subsection*{Top Down proof formulated as a search problem}
+We define the top down proof system as a search problem in the following way:
+\begin{itemize}
+	\item \textbf{\blu{State}} is an answer clause
+	\item \blu{\textbf{Successor function}} states resulting from substituting one atom with all the clauses of which it is the head.
+	\item  \textbf{\blu{Goal state}} empty answer clause
+	\item \textbf{\blu{Solution}} start state
+	\item \blu{\textbf{Heuristic function}} $ \dots $
+\end{itemize}
+\subsubsection*{Search Graph}
+The following is what a search graph may look when we want to solve $ yes \leftarrow a \land d $, given the following $ KB $:
+\centerfig{0.8}{top-down-2}
+A \textbf{possible heuristic} could be the \textbf{number of atoms} in the answer clause. \\
+\\
+However, we may also know that if the body of the answer clause contains a symbol that is not the head of \textit{any} clause in the $ KB $, then we know that the \blu{\textbf{most informative heuristic value}} is \textbf{\textit{zero}}.
+
+\subsection*{Datalog}
+\subsubsection*{Representation and Reasoning in Complex domains}
+\begin{multicols}{2}
+\noindent In complex domains, expressing knowledge with \textbf{propositions} can be quite limiting:\\
+\begin{math}
+up\_s_2\\
+up\_s_3\\
+ok\_cb_1\\
+ok\_cb_2\\
+live\_w_1\\
+connected\_w_1\_w_2
+\end{math}\\
+\noindent It is therefore often natural to consider \textbf{individuals} and their \textbf{properties}.\\
+\begin{math}
+up(s_2)\\
+up(s_3)\\
+ok(cb_1)\\
+ok(cb_2)\\
+live(w_1)\\
+connected(w_1, w_2)\\\\
+\end{math}
+\end{multicols}
+By using propositions we have no notion that for instance $ up\_s_2 $ and $ up\_s_3 $ share a meaning, or that $ live\_w_1 $ and $ connected\_w_1\_w_2 $ are about the same individual. 
+\subsubsection*{Consequently...}
+... we turn \textbf{\color{Fuchsia}propositions} into \textbf{\gre{relations}} that are applied to individuals. We gain much by doing so. Notably:
+\begin{itemize}
+	\item We can express knowledge that holds for a set of individuals (by introducing \blu{variables}):
+	\begin{align*}
+	live(W) \leftarrow connected\_to(W, W_1) \land live(W_1) \land wire(W) \land wire(W_1)
+	\end{align*}
+	\item We can \textbf{ask generic queries}:
+	\begin{align*}
+	? \quad connected\_to(W, w_1)
+	\end{align*}
+\end{itemize}
+The following slide illustrates the relation between then different proof systems:
+\centerfig{0.8}{proof-sys-1}
+\subsection*{Datalog: a relational rule language}
+Datalog expands the syntax of PDCL(Propositional Definite clause logic). We have the following definitions, where a symbol (or word) is a sequence of letters, digits or an underscore \_:\\
+\\
+\textbf{Def:} A \red{variable} is a symbol starting with an upper case letter or with $ \_ $ (Examples: $ X, Y $) \\
+\\
+\textbf{Def:} A \red{constant} is a symbol starting with a lower case letter or a sequence of digits, or is a number constant or a string (Examples: $ alan, w_1 $). \\
+\\
+\textbf{Def:} A \red{term} is either a variable or a constant (Example: $ X, Y, alan, w_1 $)\\
+\\
+\textbf{Def:} A \red{predicate symbol} is a symbol starting with a lower case letter. Constants and predicate symbols are distinguishable by their context in the knowledge base (Example: $ live, part-of, connected, in $). \\
+\\
+\textbf{Def:} An \red{atom} is a symbol of the form \blu{$ p $} or \blu{$ p(t_1, \dots, t_n) $} where \blu{$ p $} is a proposition or predicate symbol, and \blu{$ t_i $} are terms. Each $ t_i $ is referred to as an argument to the predicate. (Examples: $ sunny, in(alan, X) $).\\
+\\
+\textbf{Def:} A \red{definite clause} is either an atom (fact) or of the form:
+\begin{align*}
+h \leftarrow b_1 \land \dots \land b_m
+\end{align*} 
+where $ h $ and the $ b_i $ are atoms (Read this as "$ h $ if $ b $"). If $ m>0 $, the clause is called a rule. If $ m=0 $ the arrow can be omitted and the clause is called \textbf{atomic clause }or \textbf{fact}. An atomic clause has an \textbf{empty body}. Example:
+\begin{align*}
+in(X,Z) \leftarrow in(X,Y) \land part\_of(Y,Z)
+\end{align*}
+\textbf{Def:} A \red{knowledge base} is a set of definite clauses.\\
+\\
+\textbf{Def:} a \red{query} is of the form:
+\begin{align*}
+\mathbf{ask} \quad a_1 \land \dots \land a_m
+\end{align*}
+\subsection*{Datalog: Top Down Proof Procedure}
+An extension of the top-down proof procedure can be applied to Datalog. The idea goes as follows:
+\begin{itemize}[label = -]
+	\item We find a clause in the $ KB $ whose $ head $ matches the query. 
+	\item Substitute variables in the clause with their matching constants
+\end{itemize}
+For instance consider the following $ KB $ (we replace $ \land $ with \texttt{\&}):
+\begin{lstlisting}
+		in(alan, r123)
+		part_of(r123, cs_building)
+		in(X,Y) <- part_of(Z,Y) & in(X,Z)
+\end{lstlisting}
+The if our query is "\texttt{yes <- in(alan, cs_building)}", then using our knowledge base this translates to:
+\begin{lstlisting}
+		yes <- part_of(Z,cs_building) & in(alan,Z)
+\end{lstlisting}
+A full sketch of the proof is shown in the following slide:
+\centerfig{0.9}{datalog-1}
+\subsection*{Datalog: queries with variables}
+Using our previous knowledge base, suppose now that our query is of the form:
+\begin{lstlisting}
+		in(alan, X1) 
+		yes(X1) <- in(alan, X1)
+\end{lstlisting}
+What should the answer(s) be?
+\textbf{NOT QUITE SURE GO OVER}
+\end{document}
